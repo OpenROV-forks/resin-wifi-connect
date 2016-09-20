@@ -21,8 +21,8 @@ ssids = []
 app.get '/ssids', (req, res) ->
 	res.json(ssids)
 
-attemptConnect() ->
-    fs.statAsync(config.persistentConfig)
+attemptConnect = () ->
+	fs.statAsync(config.persistentConfig)
 	.then ->
 		data = fs.readFile(config.persistentConfig,'utf8');
 		Promise.all [
