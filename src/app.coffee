@@ -21,6 +21,22 @@ ssids = []
 app.get '/ssids', (req, res) ->
 	res.json(ssids)
 
+attemptConnect() ->
+    fs.statAsync(config.persistentConfig)
+	.then ->
+		data = fs.readFile(config.persistentConfig,'utf8');
+		Promise.all [
+			utils.durableWriteFile(config.connmanConfig, data)
+			hotspot.stop()
+		]
+	.delay(1000)	
+	.then ->
+		connman.waitForConnection(15000)
+	.then ->
+		process.exit()
+	.catch (e) ->
+		hotspot.start()
+
 app.post '/connect', (req, res) ->
 	if not (req.body.ssid? and req.body.passphrase?)
 		return res.sendStatus(400)
@@ -66,4 +82,5 @@ wifiScan.scanAsync()
 
 	hotspot.start()
 
+setTimeOut(attemptConnect,2*60*1000)
 app.listen(9080)
